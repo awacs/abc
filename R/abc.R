@@ -24,7 +24,7 @@
 
 abc <- function(target, param, sumstat, tol, method, hcorr = TRUE,
                 transf = "none", logit.bounds = c(0,0), subset = NULL,
-                kernel = "epanechnikov", numnet = 10, sizenet = 5,
+                kernel = "epanechnikov", distance = "euclidean", numnet = 10, sizenet = 5,
                 lambda = c(0.0001,0.001,0.01), trace = FALSE, maxit =
                 500, ...){
     
@@ -123,25 +123,23 @@ abc <- function(target, param, sumstat, tol, method, hcorr = TRUE,
     }
     else statnames <- colnames(sumstat)
     
-    ## scale everything
+    ## scale everything (scaled.sumstat and scaled target are used in regression correction)
     ## #################
-    
+
+    target_raw <- target
+
     scaled.sumstat <- sumstat
     for(j in 1:nss){
         scaled.sumstat[,j] <- normalise(sumstat[,j],sumstat[,j][gwt])
     }
-    
+
     for(j in 1:nss){
         target[j] <- normalise(target[j],sumstat[,j][gwt])
     }
-    
-    ## calculate euclidean distance
-    ## ############################
-    sum1 <- 0
-    for(j in 1:nss){
-        sum1 <- sum1 + (scaled.sumstat[,j]-target[j])^2
-    }
-    dist <- sqrt(sum1)
+
+    ## calculate distance
+    ## ##################
+    dist <- calc_distance(sumstat, target_raw, gwt, method = distance)
     
     ## includes the effect of gwt in the tolerance
     dist[!gwt] <- floor(max(dist[gwt])+10)
@@ -887,8 +885,8 @@ plot.abc <- function(x, param, subsample = 1000, true = NULL,
     if(mymethod=="loclinear") mymain <- "Residuals from lsfit()"
     if(mymethod=="neuralnet") mymain <- "Residuals from nnet()"
     if(mymethod=="ridge") mymain <- "Residuals from lm.ridge()"
-    qqnorm(residuals, pch=mypch, main=mymain, sub="Normal Q-Q plot", xlab="Theoretical quantiles", ylab="Residuals",...)
-    qqline(residuals)
+    qqnorm(residuals[,i], pch=mypch, main=mymain, sub="Normal Q-Q plot", xlab="Theoretical quantiles", ylab=paste("Residuals (", parnames[i], ")", sep=""),...)
+    qqline(residuals[,i])
     
   } # np
 

@@ -22,7 +22,7 @@
 #
 ###################################################################### 
 
-expected.deviance <- function(target, postsumstat, kernel = "gaussian", subset=NULL, print=TRUE){
+expected.deviance <- function(target, postsumstat, kernel = "gaussian", subset=NULL, print=TRUE, distance = "euclidean"){
     
     if(missing(target)) stop("'target' is missing with no default", call.=F)
     if(missing(postsumstat)) stop("'postsumstat' is missing with no default", call.=F)
@@ -50,19 +50,9 @@ expected.deviance <- function(target, postsumstat, kernel = "gaussian", subset=N
     if(is.null(subset)) subset <- rep(TRUE,length(postsumstat[,1]))
     gwt <- as.logical(gwt*subset)
     
-    ## scale 
-    ## #######
-    scaled.postsumstat <- postsumstat
-    for(j in 1:nss) scaled.postsumstat[,j] <- normalise(postsumstat[,j],postsumstat[,j][gwt])
-    for(j in 1:nss) target[j] <- normalise(target[j],postsumstat[,j][gwt])
-
-    ## calculate euclidean distance
-    ## ############################
-    sum1 <- 0
-    for(j in 1:nss){
-        sum1 <- sum1 + (scaled.postsumstat[,j]-target[j])^2
-    }
-    dist <- sqrt(sum1)
+    ## calculate distance
+    ## ##################
+    dist <- calc_distance(postsumstat, target, gwt, method = distance)
 
     ## epsilon
     epsilon <- max(dist)

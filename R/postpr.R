@@ -23,7 +23,7 @@
 ######################################################################
 
 postpr <- function(target, index, sumstat, tol, subset=NULL, method, corr=TRUE, kernel="epanechnikov",
-                   numnet = 10, sizenet = 5, lambda = c(0.0001,0.001,0.01), trace = TRUE, maxit = 500, ...){
+                   distance = "euclidean", numnet = 10, sizenet = 5, lambda = c(0.0001,0.001,0.01), trace = TRUE, maxit = 500, ...){
 
   linout <- FALSE
   call <- match.call()
@@ -93,24 +93,23 @@ postpr <- function(target, index, sumstat, tol, subset=NULL, method, corr=TRUE, 
     target <- target[cond1]
   }
 
-  ## scale everything
+  ## scale everything (scaled.sumstat and scaled target are used in regression correction)
   ## ################
+
+  target_raw <- target
+
   scaled.sumstat <- sumstat
   for(j in 1:nss){
     scaled.sumstat[,j] <- normalise(sumstat[,j],sumstat[,j][gwt])
   }
-  
+
   for(j in 1:nss){
     target[j] <- normalise(target[j],sumstat[,j][gwt])
   }
 
-  ## calculate euclidean distance
-  ## ############################
-  sum1 <- 0
-  for(j in 1:nss){
-    sum1 <- sum1 + (scaled.sumstat[,j]-target[j])^2
-  }
-  dist <- sqrt(sum1)
+  ## calculate distance
+  ## ##################
+  dist <- calc_distance(sumstat, target_raw, gwt, method = distance)
 
   # includes the effect of gwt in the tolerance
   dist[!gwt] <- floor(max(dist[gwt])+10)
