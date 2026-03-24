@@ -409,38 +409,38 @@ abc <- function(target, param, sumstat, tol, method, hcorr = TRUE,
     }
     
     abc.return(transf, logit.bounds, method, call, numparam, nss, paramnames, statnames,
-               unadj.values, adj.values, ss, weights, residuals, dist, wt1, gwt, lambda, hcorr,aic,bic)
+               unadj.values, adj.values, ss, weights, residuals, dist, wt1, gwt, lambda, hcorr, aic, bic, distance)
     
 }
 
 
 abc.return <- function(transf, logit.bounds, method, call, numparam, nss, paramnames, statnames,
-                       unadj.values, adj.values, ss, weights, residuals, dist, wt1, gwt, lambda, hcorr,aic,bic){
-    
+                       unadj.values, adj.values, ss, weights, residuals, dist, wt1, gwt, lambda, hcorr, aic, bic, distance){
+
     if(method == "rejection"){
         out <- list(unadj.values=unadj.values, ss=ss, dist=dist,
                     call=call, na.action=gwt, region=wt1, transf=transf, logit.bounds = logit.bounds,
-                    method="rejection", numparam=numparam, numstat=nss, names=list(parameter.names=paramnames, statistics.names=statnames))
+                    method="rejection", distance=distance, numparam=numparam, numstat=nss, names=list(parameter.names=paramnames, statistics.names=statnames))
     }
     else if(method == "loclinear"){
         out <- list(adj.values=adj.values, unadj.values=unadj.values,
                     ss=ss, weights=weights, residuals=residuals, dist=dist,
                     call=call, na.action=gwt, region=wt1, transf=transf, logit.bounds = logit.bounds,
-                    method="loclinear", hcorr = hcorr, numparam=numparam, numstat=nss,aic=aic,bic=bic,
+                    method="loclinear", distance=distance, hcorr = hcorr, numparam=numparam, numstat=nss,aic=aic,bic=bic,
                     names=list(parameter.names=paramnames, statistics.names=statnames))
     }
     else if(method == "ridge"){
         out <- list(adj.values=adj.values, unadj.values=unadj.values,
                     ss=ss, weights=weights, residuals=residuals, dist=dist,
                     call=call, na.action=gwt, region=wt1, transf=transf, logit.bounds = logit.bounds,
-                    method="ridge", hcorr = hcorr, numparam=numparam, numstat=nss,
+                    method="ridge", distance=distance, hcorr = hcorr, numparam=numparam, numstat=nss,
                     names=list(parameter.names=paramnames, statistics.names=statnames))
     }
     else if(method == "neuralnet"){
         out <- list(adj.values=adj.values, unadj.values=unadj.values,
                     ss=ss, weights=weights, residuals=residuals, dist=dist,
                     call=call, na.action=gwt, region=wt1, transf=transf, logit.bounds = logit.bounds,
-                    method="neuralnet", hcorr = hcorr, lambda=lambda, numparam=numparam, numstat=nss,
+                    method="neuralnet", distance=distance, hcorr = hcorr, lambda=lambda, numparam=numparam, numstat=nss,
                     names=list(parameter.names=paramnames, statistics.names=statnames))
     }
     
@@ -670,6 +670,7 @@ plot.abc <- function(x, param, subsample = 1000, true = NULL,
   parnames <- abc.out$names$parameter.names
   transf <- abc.out$transf
   logit.bounds <- abc.out$logit.bounds
+  mydistance <- abc.out$distance
   
   ##check if param is compatible with x
   cond <- isTRUE(c(match(colnames(param), parnames), match(parnames, colnames(param))))
@@ -869,8 +870,8 @@ plot.abc <- function(x, param, subsample = 1000, true = NULL,
     myylim <- range(alldist[mysample])#*c(1,1.2)
 
     plot(param[mysample,i], alldist[mysample], col=cols[1],
-         xlab=myxlab, ylab="log Euclidean distance", ylim=myylim, pch=mypch, ...)
-    title("Euclidean distances")
+         xlab=myxlab, ylab=paste("log", mydistance, "distance"), ylim=myylim, pch=mypch, ...)
+    title(paste(mydistance, "distances"))
     mtext(paste("N(All / plotted) = ", numsim, "/", subsample, sep=" "), side = 3, line = .5)
     points(param[myregion,i], alldist[myregion], col=cols[2], pch=mypch, ...)
     mypar <- par()
