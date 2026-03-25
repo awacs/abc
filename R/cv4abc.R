@@ -27,7 +27,7 @@ cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
                    statistic = "median", prior.range = NULL,
                    method, hcorr = TRUE,
                    transf = "none", logit.bounds = c(0,0), subset = NULL, kernel = "epanechnikov",
-                   numnet = 10, sizenet = 5, lambda = c(0.0001,0.001,0.01), trace = FALSE, maxit = 500, ...){
+                   distance = "euclidean", numnet = 10, sizenet = 5, lambda = c(0.0001,0.001,0.01), trace = FALSE, maxit = 500, ...){
 
     mywarn <- options()$warn
     options(warn=-1)
@@ -54,6 +54,7 @@ cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
         transf <- abc.out$transf
         logit.bounds <- abc.out$logit.bounds
         kernel <- "epanechnikov"
+        distance <- abc.out$distance
     }
     
     ## checks, numbers of stats, params, sims
@@ -129,7 +130,7 @@ cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
             mysumstat <- sumstat[-mysamp,]
             mysubset <- subset[-mysamp]
             subres <- withCallingHandlers( abc(target = mytarget, param = myparam, sumstat = mysumstat, tol=mytol,
-                          subset = mysubset, method = method, transf = transf, logit.bounds = logit.bounds, kernel = kernel,hcorr = hcorr), warning = namesWarningFilter)
+                          subset = mysubset, method = method, transf = transf, logit.bounds = logit.bounds, kernel = kernel, hcorr = hcorr, distance = distance), warning = namesWarningFilter)
             if(statistic == "median") estim <- invisible(summary.abc(subres, print = F, ...)[3, ])
             if(statistic == "mean") estim <- invisible(summary.abc(subres, print = F, ...)[4, ])
             if(statistic == "mode") estim <- invisible(summary.abc(subres, print = F, ...)[5, ])
