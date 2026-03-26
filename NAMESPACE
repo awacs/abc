@@ -1,11 +1,11 @@
 export(abc, cv4abc, postpr, cv4postpr, expected.deviance, gfit, gfitpca)
-importFrom(graphics, plot, points)
+importFrom(graphics, plot, points, pairs)
 importFrom(nnet, nnet, multinom)
 importFrom(MASS,lm.ridge)
 importFrom(quantreg,rq)
 importFrom(locfit,locfit)
-importFrom("grDevices", "as.graphicsAnnot", "dev.off", "devAskNewPage",
-     "deviceIsInteractive", "heat.colors", "pdf")
+importFrom("grDevices", "as.graphicsAnnot", "adjustcolor", "dev.off", "devAskNewPage",
+     "deviceIsInteractive", "heat.colors", "pdf", "rainbow")
 importFrom("graphics", "abline", "barplot", "hist", "legend", "lines",
      "mtext", "par", "segments", "title")
 importFrom("stats", "as.formula", "coef", "density", "fitted", "lsfit",
@@ -16,9 +16,10 @@ import(abc.data)
   
 # abc S3methods
 S3method(print, abc)
-S3method(summary, abc) 
+S3method(summary, abc)
 S3method(hist, abc)
-S3method(plot, abc) 
+S3method(plot, abc)
+S3method(pairs, abc)
 
 # cv4abc S3methods
 S3method(plot, cv4abc)

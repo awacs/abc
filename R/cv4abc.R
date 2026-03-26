@@ -276,7 +276,7 @@ plot.cv4abc <- function(x, sbc = FALSE, exclude = NULL, log = NULL, file = NULL,
                      col = "steelblue", border = "white",
                      main = paste0(caption[j], "\n(tol=", mytol, ")"),
                      xlab = "normalised rank", ylab = if(j==1) "count" else "")
-                abline(h = expected_height, col = "crimson", lty = 2, lwd = 1.5)
+                abline(h = expected_height, col = "red", lty = 2, lwd = 1.5)
             }
             mtext("SBC Rank Histograms  (flat = well calibrated)",
                   outer = TRUE, line = -1.5, cex = 1.1)
