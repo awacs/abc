@@ -637,6 +637,82 @@ hist.abc <- function(x, unadj = FALSE, true = NULL,
 } # end of hist.abc
 
 
+pairs.abc <- function(x, unadj = FALSE, true = NULL,
+                      col = "steelblue", col.true = "red",
+                      alpha = 0.15, cex = 0.3, bins = 40,
+                      file = NULL, postscript = FALSE, onefile = TRUE, ...){
+
+    if (!inherits(x, "abc"))
+        stop("Use only with objects of class \"abc\".", call.=F)
+
+    abc.out  <- x
+    np       <- abc.out$numparam
+    parnames <- abc.out$names[[1]]
+
+    if(np < 2)
+        stop("pairs.abc requires at least 2 parameters.", call.=F)
+
+    if(!is.null(true)){
+        if(!is.vector(true))
+            stop("Supply true parameter value(s) as a vector.", call.=F)
+        if(length(true) != np)
+            stop("Number of true values has to be the same as number of parameters in 'x'.", call.=F)
+    }
+
+    if(abc.out$method == "rejection" || unadj)
+        res <- abc.out$unadj.values
+    else
+        res <- abc.out$adj.values
+    res <- matrix(res, ncol = np)
+
+    pt.col <- adjustcolor(col, alpha.f = alpha)
+
+    ## Devices
+    if(!is.null(file)){
+        file <- substitute(file)
+        if(!postscript) pdf(file = paste(file, "pdf", sep="."), onefile = onefile)
+        if(postscript)  postscript(file = paste(file, "ps",  sep="."), onefile = onefile)
+    }
+
+    old_par <- par(mfrow = c(np, np),
+                   mar   = c(2, 2, 1.5, 0.5),
+                   oma   = c(2, 2, 3, 1),
+                   cex   = 0.8)
+    on.exit(par(old_par), add = TRUE)
+
+    for(i in 1:np){
+        for(j in 1:np){
+            if(i == j){
+                ## diagonal: marginal posterior histogram
+                hist(res[, i], breaks = bins, col = col, border = "white",
+                     main = "", xlab = "", ylab = "")
+                if(!is.null(true))
+                    abline(v = true[i], col = col.true, lwd = 2)
+            } else {
+                ## off-diagonal: joint scatter
+                plot(res[, j], res[, i],
+                     pch = 16, cex = cex, col = pt.col,
+                     xlab = "", ylab = "", main = "")
+                if(!is.null(true)){
+                    abline(v = true[j], col = col.true, lwd = 1.5)
+                    abline(h = true[i], col = col.true, lwd = 1.5)
+                }
+            }
+            ## axis labels on outer edges only
+            if(i == np) mtext(parnames[j], side = 1, line = 2.5, cex = 0.85)
+            if(j == 1)  mtext(parnames[i], side = 2, line = 2.5, cex = 0.85)
+        }
+    }
+
+    mtext("ABC Posterior Pair Plot", outer = TRUE, side = 3, line = 1, cex = 1.1)
+
+    if(!is.null(file)) dev.off()
+
+    invisible()
+
+} # end of pairs.abc
+
+
 ##########################################################################################
 
 ## plots: for each parameter
