@@ -252,7 +252,7 @@ plot.cv4abc <- function(x, sbc = FALSE, exclude = NULL, log = NULL, file = NULL,
     }
 
     if(sbc){
-        ## ── SBC mode: rank histograms + coverage curve ─────────────────────────
+        ## -- SBC mode: rank histograms + coverage curve -------------------------
         levels <- .SBC_LEVELS
         cols   <- rainbow(np)
 
@@ -295,7 +295,7 @@ plot.cv4abc <- function(x, sbc = FALSE, exclude = NULL, log = NULL, file = NULL,
         }
 
     } else {
-        ## ── Normal mode: true vs estimated scatter ──────────────────────────────
+        ## -- Normal mode: true vs estimated scatter ------------------------------
         true  <- cv4abc.out$true
         estim <- as.data.frame(cv4abc.out$estim)
 
@@ -348,7 +348,7 @@ summary.cv4abc <- function(object, sbc = FALSE, print = TRUE,
     nval     <- length(cv4abc.out$cvsamples)
 
     if(sbc){
-        ## ── SBC mode: coverage table + MAE from diagonal ───────────────────────
+        ## -- SBC mode: coverage table + MAE from diagonal -----------------------
         levels <- .SBC_LEVELS
         cat(paste0("SBC calibration check based on ", nval, " cross-validation samples\n"))
 
@@ -357,8 +357,8 @@ summary.cv4abc <- function(object, sbc = FALSE, print = TRUE,
             ranks    <- matrix(cv4abc.out$ranks[[tkey]], ncol = np)
             coverage <- .sbc_coverage(ranks, levels)
 
-            cat(paste0("\n── Tolerance: ", mytol, " ──\n"))
-            sep <- paste(rep("─", 10 + 10 * np), collapse="")
+            cat(paste0("\n-- Tolerance: ", mytol, " --\n"))
+            sep <- paste(rep("-", 10 + 10 * np), collapse="")
             cat(sep, "\n")
             cat(sprintf("  %-8s", "Level"), sprintf("%10s", parnames), "\n")
             cat(sep, "\n")
@@ -379,7 +379,7 @@ summary.cv4abc <- function(object, sbc = FALSE, print = TRUE,
         invisible(cv4abc.out)
 
     } else {
-        ## ── Normal mode: prediction error table (original behaviour) ────────────
+        ## -- Normal mode: prediction error table (original behaviour) ------------
         true  <- cv4abc.out$true
         estim <- cv4abc.out$estim
 
