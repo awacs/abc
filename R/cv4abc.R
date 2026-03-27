@@ -48,6 +48,7 @@ cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
                    distance = "euclidean", numnet = 10, sizenet = 5,
                    lambda = c(0.0001,0.001,0.01), trace = FALSE, maxit = 500,
                    keep_posterior = FALSE,
+                   ncores = 1,
                    ...){
 
     mywarn <- options()$warn
@@ -145,7 +146,7 @@ cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
         res_ranks <- matrix(ncol = np, nrow = nval)
         post_list <- if (keep_posterior) vector("list", nval) else NULL
 
-        for(i in 1:nval){
+        cv_one <- function(i) {
             mysamp    <- cvsamp[i]
             mytrue    <- param[mysamp, ]
             mytarget  <- sumstat[mysamp, ]
@@ -164,19 +165,30 @@ cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
             if(statistic == "median") estim <- invisible(summary.abc(subres, print = F, ...)[3, ])
             if(statistic == "mean")   estim <- invisible(summary.abc(subres, print = F, ...)[4, ])
             if(statistic == "mode")   estim <- invisible(summary.abc(subres, print = F, ...)[5, ])
-            res_estim[i, ] <- estim
 
             ## --- SBC rank ---
-            ## adj.values is already back-transformed to original scale by abc()
-            ## (exp applied when transf="log"), so ranking directly is equivalent
-            ## to ranking in log-space (monotone transform).
             post <- if (!is.null(subres$adj.values)) subres$adj.values else subres$unadj.values
             post <- matrix(post, ncol = np)
             true_row <- as.numeric(mytrue)
-            res_ranks[i, ] <- colMeans(post < matrix(true_row, nrow = nrow(post), ncol = np, byrow = TRUE))
+            rank_i <- colMeans(post < matrix(true_row, nrow = nrow(post), ncol = np, byrow = TRUE))
 
-            if (keep_posterior) post_list[[i]] <- post
+            list(estim = estim, rank = rank_i,
+                 post = if (keep_posterior) post else NULL,
+                 subres = subres)
         }
+
+        if (ncores > 1) {
+            results <- parallel::mclapply(1:nval, cv_one, mc.cores = ncores)
+        } else {
+            results <- lapply(1:nval, cv_one)
+        }
+
+        for (i in 1:nval) {
+            res_estim[i, ] <- results[[i]]$estim
+            res_ranks[i, ] <- results[[i]]$rank
+            if (keep_posterior) post_list[[i]] <- results[[i]]$post
+        }
+        subres <- results[[nval]]$subres
 
         if(np == 1){
             res_estim <- c(res_estim)

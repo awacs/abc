@@ -8,6 +8,7 @@ importFrom("grDevices", "as.graphicsAnnot", "adjustcolor", "dev.off", "devAskNew
      "deviceIsInteractive", "heat.colors", "pdf", "rainbow")
 importFrom("graphics", "abline", "barplot", "hist", "legend", "lines",
      "mtext", "par", "segments", "title")
+importFrom(parallel, mclapply)
 importFrom("stats", "as.formula", "coef", "density", "fitted", "lsfit",
      "mad", "median", "na.omit", "prcomp", "predict", "qqline",
      "qqnorm", "quantile", "runif", "var", "weighted.mean")
