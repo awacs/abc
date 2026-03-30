@@ -42,7 +42,7 @@
 
 
 cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
-                   statistic = "median", prior.range = NULL,
+                   statistic = "mode", prior.range = NULL,
                    method, hcorr = TRUE,
                    transf = "none", logit.bounds = c(0,0), subset = NULL, kernel = "epanechnikov",
                    distance = "euclidean", numnet = 10, sizenet = 5,
