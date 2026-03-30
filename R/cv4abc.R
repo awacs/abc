@@ -273,12 +273,12 @@ plot.cv4abc <- function(x, sbc = FALSE, exclude = NULL, log = NULL, file = NULL,
             ranks <- matrix(cv4abc.out$ranks[[tkey]], ncol = np)
 
             if (!is.null(file) || !ask) {
-                ## rank histograms
-                old_par <- par(mfrow = c(np, 1), cex = 1, cex.main = 1.1, cex.lab = 1)
+                ## rank histograms (2x2 grid, auto-paginates in PDF)
+                old_par <- par(mfrow = c(2, 2), cex = 1, cex.main = 1.1, cex.lab = 1)
                 on.exit(par(old_par), add = TRUE)
             } else {
                 devAskNewPage(TRUE)
-                old_par <- par(mfrow = c(np, 1), cex = 1, cex.main = 1.1, cex.lab = 1)
+                old_par <- par(mfrow = c(2, 2), cex = 1, cex.main = 1.1, cex.lab = 1)
                 on.exit(par(old_par), add = TRUE)
             }
 
