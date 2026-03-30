@@ -319,8 +319,17 @@ plot.cv4abc <- function(x, sbc = FALSE, exclude = NULL, log = NULL, file = NULL,
 
         if(is.null(file) && ask && 1 < np) devAskNewPage(TRUE)
 
-        par(cex = 1, cex.main = 1.2, cex.lab = 1.1)
+        max_per_page <- 6  # 3x2 grid cap
+        ncol_grid <- min(np, 2)
+        nrow_grid <- min(ceiling(np / ncol_grid), 3)
+        old_par <- par(mfrow = c(nrow_grid, ncol_grid), cex = 1, cex.main = 1.2, cex.lab = 1.1)
+        on.exit(par(old_par), add = TRUE)
         for(par in 1:np){
+            if(par > 1 && (par - 1) %% max_per_page == 0){
+                ncol_remain <- min(np - par + 1, 2)
+                nrow_remain <- min(ceiling((np - par + 1) / ncol_remain), 3)
+                par(mfrow = c(nrow_remain, ncol_remain))
+            }
             mylog   <- log[par]
             columns <- seq(par, numtols * np, by = np)
             if(!is.null(exclude)){
