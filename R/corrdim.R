@@ -193,21 +193,25 @@ corrDim4abc <- function(sumstat, target = NULL, distance = "euclidean",
 is.corrdim4abc <- function(x) inherits(x, "corrdim4abc")
 
 
-plot.corrdim4abc <- function(x, file = NULL, postscript = FALSE, onefile = TRUE,
-                             ask = !is.null(deviceIsInteractive()), ...) {
+plot.corrdim4abc <- function(x, file = NULL, postscript = FALSE, onefile = TRUE, ...) {
 
     if (!inherits(x, "corrdim4abc"))
         stop("Use only with objects of class \"corrdim4abc\".", call. = FALSE)
 
-    ## Devices ('file' is a character basename, e.g. "corrdim")
-    save.devAskNewPage <- devAskNewPage()
+    ## Devices ('file' is a character basename, e.g. "corrdim").
+    ## Open the target device BEFORE any other graphics call, otherwise the
+    ## first plotting op leaks a blank Rplots.pdf to the default device in
+    ## batch / Rscript runs.
     if (!is.null(file)) {
         file <- as.character(file)
         if (!postscript) pdf(file = paste(file, "pdf", sep = "."), onefile = onefile)
-        if (postscript)  postscript(file = paste(file, "ps",  sep = "."), onefile = onefile)
+        else             postscript(file = paste(file, "ps", sep = "."), onefile = onefile)
+        on.exit(dev.off(), add = TRUE)          # device (and its par) discarded on exit
+        par(mfrow = c(1, 2), cex = 1, cex.main = 1.1, cex.lab = 1)
+    } else {
+        old_par <- par(mfrow = c(1, 2), cex = 1, cex.main = 1.1, cex.lab = 1)
+        on.exit(par(old_par), add = TRUE)       # restore caller's device par
     }
-    old_par <- par(mfrow = c(1, 2), cex = 1, cex.main = 1.1, cex.lab = 1)
-    on.exit(par(old_par), add = TRUE)
 
     plat <- x$plateau
 
@@ -267,9 +271,6 @@ plot.corrdim4abc <- function(x, file = NULL, postscript = FALSE, onefile = TRUE,
            legend = c("all-pairs C(eps)",
                       if (!is.null(x$C_obs)) "pointwise C_obs(eps)  [ABC acceptance]"),
            col = c("steelblue", if (!is.null(x$C_obs)) "darkgreen"), lwd = 2)
-
-    if (!is.null(file)) dev.off()
-    else devAskNewPage(save.devAskNewPage)
 
     invisible()
 }
