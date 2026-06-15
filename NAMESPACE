@@ -1,4 +1,4 @@
-export(abc, cv4abc, postpr, cv4postpr, expected.deviance, gfit, gfitpca)
+export(abc, cv4abc, postpr, cv4postpr, expected.deviance, gfit, gfitpca, corrDim4abc, is.corrdim4abc)
 importFrom(graphics, plot, points, pairs)
 importFrom(nnet, nnet, multinom)
 importFrom(MASS,lm.ridge)
@@ -7,11 +7,11 @@ importFrom(locfit,locfit)
 importFrom("grDevices", "as.graphicsAnnot", "adjustcolor", "dev.off", "devAskNewPage",
      "deviceIsInteractive", "heat.colors", "pdf", "rainbow")
 importFrom("graphics", "abline", "barplot", "hist", "legend", "lines",
-     "mtext", "par", "segments", "title")
+     "mtext", "par", "rect", "segments", "title")
 importFrom(parallel, mclapply)
-importFrom("stats", "as.formula", "coef", "density", "fitted", "lsfit",
-     "mad", "median", "na.omit", "prcomp", "predict", "qqline",
-     "qqnorm", "quantile", "runif", "var", "weighted.mean")
+importFrom("stats", "approx", "as.formula", "coef", "density", "dist", "ecdf",
+     "fitted", "lsfit", "mad", "median", "na.omit", "prcomp", "predict", "qqline",
+     "qqnorm", "quantile", "runif", "smooth.spline", "var", "weighted.mean")
      
 import(abc.data)
   
@@ -25,6 +25,10 @@ S3method(pairs, abc)
 # cv4abc S3methods
 S3method(plot, cv4abc)
 S3method(summary, cv4abc)
+
+# corrDim4abc S3methods
+S3method(plot, corrdim4abc)
+S3method(summary, corrdim4abc)
 
 # postprob S3method
 S3method(summary, postpr)
