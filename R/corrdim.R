@@ -7,13 +7,13 @@
 #
 # Grassberger-Procaccia correlation dimension (D2) of the simulated
 # summary-statistic cloud, measured in the EXACT representation and
-# distance metric the abc() run uses.  The acceptance count of ABC
-# within tolerance eps is the correlation integral C(eps); its scaling
-# exponent D2 is therefore the curse-of-dimensionality exponent that
-# governs whether ABC works, measured in ABC's own currency.
+# distance metric the abc() run uses.  D2 is the effective dimension the
+# cloud occupies at scale eps, and a noise-inclusive UPPER bound on the
+# data's informative dimension:  informative (<= n_params) <= D2 <= k.
 #
-# The estimate is a noise-inclusive UPPER bound on the data's
-# informative dimension:  informative (<= n_params) <= D2(eps_abc) <= k.
+# D2 is a property of the simulated cloud ALONE -- no observed data is
+# needed.  An optional 'target' (off by default) only overlays the ABC
+# operating point eps_abc and the pointwise acceptance curve C_obs(eps).
 #
 ######################################################################
 
@@ -70,6 +70,9 @@ corrDim4abc <- function(sumstat, target = NULL, distance = "euclidean",
                         ngrid = 250, smooth = TRUE,
                         scaling.quantiles = c(0.05, 0.40),
                         seed = NULL, ...) {
+    ## 'target' is OPTIONAL and off by default. The correlation dimension is a
+    ## property of the simulated cloud alone; supplying 'target' only adds the
+    ## eps_abc operating-point marker + pointwise C_obs acceptance curve.
 
     ## checks
     ## ######
@@ -298,14 +301,14 @@ summary.corrdim4abc <- function(object, print = TRUE,
         cat("    (noise-inclusive UPPER bound on the informative dimension:\n")
         cat(sprintf("     informative <= D2 <= nominal %d)\n", x$numstat))
         cat("\n")
+        ## target is optional (off by default); only shown when supplied
         if (!is.na(x$eps_abc)) {
+            cat("\n")
             cat(sprintf("  eps_abc (tol=%.3g)   : %.4g  (%.1f%% of pairwise distances)\n",
                         x$tol, x$eps_abc, 100 * x$eps_abc.pct))
             cat(sprintf("  eps_abc in plateau  : %s\n",
                         if (x$eps_abc.in.plateau) "YES  -- ABC operates at the D2 plateau"
                         else "NO   -- check sampling / scaling region"))
-        } else {
-            cat("  eps_abc             : not computed (no 'target' supplied)\n")
         }
     }
 

@@ -24,9 +24,10 @@ corrDim4abc(sumstat, target = NULL, distance = "euclidean", subset = NULL,
 \arguments{
   \item{sumstat}{a matrix or data frame of simulated summary statistics, in the
     same representation passed to \code{\link{abc}} (e.g. already normalised/cut).}
-  \item{target}{optional observed summary statistics. When supplied, the
-    operating tolerance \code{eps_abc} and the pointwise acceptance curve
-    \eqn{C_{obs}(\epsilon)} are computed.}
+  \item{target}{optional observed summary statistics, \code{NULL} (off) by
+    default. The correlation dimension is a property of the simulated cloud
+    alone; supplying \code{target} only adds the operating-point marker
+    \code{eps_abc} and the pointwise acceptance curve \eqn{C_{obs}(\epsilon)}.}
   \item{distance}{distance metric, matching the \code{abc()} run: one of
     \code{"euclidean"}, \code{"manhattan"} or \code{"wasserstein"}. The same
     per-column MAD weighting / CDF transform as \code{\link{abc}} is applied.}
@@ -62,10 +63,15 @@ corrDim4abc(sumstat, target = NULL, distance = "euclidean", subset = NULL,
 }
 \examples{
 \dontrun{
-cd <- corrDim4abc(sumstat = normalized_csfs_sim, target = tgt,
-                  distance = "euclidean", tol = 0.01, nsub = 4000, nrep = 3)
+## dimension of the simulated cloud (no target needed)
+cd <- corrDim4abc(sumstat = normalized_csfs_sim,
+                  distance = "euclidean", nsub = 4000, nrep = 3)
 summary(cd)
 plot(cd, file = "corrdim")
+
+## optional: also mark the ABC operating point eps_abc
+cd2 <- corrDim4abc(sumstat = normalized_csfs_sim, target = tgt,
+                   distance = "euclidean", tol = 0.01, nsub = 4000, nrep = 3)
 }
 }
 \keyword{models}
