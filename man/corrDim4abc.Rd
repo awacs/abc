@@ -46,10 +46,13 @@ corrDim4abc(sumstat, target = NULL, distance = "euclidean", subset = NULL,
 }
 \value{
   An object of class \code{"corrdim4abc"}: a list with the \eqn{\epsilon} grid,
-  the correlation integral \code{C} (pooled and per replicate), the optional
-  pointwise curve \code{C_obs}, the local slope \code{D2}, the operating point
-  \code{eps_abc}, and a \code{plateau} summary (median height with a range).
-  Methods \code{plot} and \code{summary} are provided.
+  the all-pairs correlation integral \code{C} (pooled and per replicate) and its
+  slope \code{D2}, a \code{plateau} summary (median height with a range), and --
+  when \code{target} is supplied -- the pointwise curve \code{C_obs}, the
+  target-relative dimension \code{D2_obs}, the operating point \code{eps_abc},
+  and \code{D2_at_eps_abc} (the target-relative dimension at \code{eps_abc}, the
+  dimension ABC actually operates in). Methods \code{plot} and \code{summary}
+  are provided.
 }
 \details{
   The metric is reproduced from the package internals (\code{calc_distance},

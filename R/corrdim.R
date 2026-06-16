@@ -148,6 +148,11 @@ corrDim4abc <- function(sumstat, target = NULL, distance = "euclidean",
                         function(r) .corrdim_slope(eps_grid, C_reps[r, ], smooth),
                         numeric(ngrid)))
 
+    ## target-relative (pointwise) dimension: slope of C_obs, i.e. the scaling
+    ## of "fraction of sims within eps of the target" -- the acceptance-volume
+    ## exponent ABC actually pays, since ABC selects sims close to the target.
+    D2_obs <- if (!is.null(C_obs)) .corrdim_slope(eps_grid, C_obs, smooth) else NULL
+
     ## scaling region + headline plateau
     ## #################################
     qs     <- quantile(all.d, scaling.quantiles, names = FALSE)
@@ -166,6 +171,11 @@ corrDim4abc <- function(sumstat, target = NULL, distance = "euclidean",
     eps_abc.pct <- if (!is.na(eps_abc)) mean(all.d < eps_abc) else NA_real_
     eps_abc.in.plateau <- !is.na(eps_abc) && eps_abc >= qs[1] && eps_abc <= qs[2]
 
+    ## the ABC-relevant number: target-relative dimension AT the operating point
+    D2_at_eps_abc <- if (!is.na(eps_abc) && !is.null(D2_obs))
+                         as.numeric(approx(eps_grid, D2_obs, xout = eps_abc, rule = 2)$y)
+                     else NA_real_
+
     out <- list(
         eps_grid    = eps_grid,
         C           = C,
@@ -174,9 +184,11 @@ corrDim4abc <- function(sumstat, target = NULL, distance = "euclidean",
         eps_mid     = eps_mid,
         D2          = D2,
         D2_reps     = D2_reps,
+        D2_obs      = D2_obs,
         eps_abc     = eps_abc,
         eps_abc.pct = eps_abc.pct,
         eps_abc.in.plateau = eps_abc.in.plateau,
+        D2_at_eps_abc = D2_at_eps_abc,
         plateau     = plateau,
         tol         = tol,
         distance    = distance,
@@ -221,8 +233,10 @@ plot.corrdim4abc <- function(x, file = NULL, postscript = FALSE, onefile = TRUE,
     ## -- Panel 1: local slope D2 vs eps (the headline figure) --------------
     ## clamp y to a sensible band: extrapolated slopes in the shaded tails
     ## can spike, so cap by a high quantile rather than the raw max.
-    finiteD2 <- x$D2[is.finite(x$D2)]
+    bothD2   <- c(x$D2, x$D2_obs)
+    finiteD2 <- bothD2[is.finite(bothD2)]
     ymax <- max(plat$value * 1.5, plat$hi * 1.3,
+                if (!is.na(x$D2_at_eps_abc)) x$D2_at_eps_abc * 1.15 else -Inf,
                 as.numeric(quantile(finiteD2, 0.95, names = FALSE)), na.rm = TRUE)
     ylim <- c(0, ymax)
     plot(x$eps_mid, x$D2, log = "x", type = "n", ylim = ylim,
@@ -241,19 +255,29 @@ plot.corrdim4abc <- function(x, file = NULL, postscript = FALSE, onefile = TRUE,
         for (r in seq_len(x$nrep))
             lines(x$eps_mid, x$D2_reps[r, ], col = adjustcolor("steelblue", 0.25))
 
-    lines(x$eps_mid, x$D2, col = "steelblue", lwd = 2)
-    abline(h = plat$value, col = "black", lty = 2)
+    lines(x$eps_mid, x$D2, col = "steelblue", lwd = 2)        # all-pairs (cloud)
+    abline(h = plat$value, col = "steelblue", lty = 2)
 
+    ## target-relative dimension curve + operating point (only with target)
+    if (!is.null(x$D2_obs))
+        lines(x$eps_mid, x$D2_obs, col = "darkgreen", lwd = 2)
     if (!is.na(x$eps_abc)) {
         abline(v = x$eps_abc, col = "red", lwd = 2)
         mtext(expression(epsilon[abc]), side = 3, at = x$eps_abc, col = "red", line = 0.2)
     }
+    if (!is.na(x$D2_at_eps_abc))
+        points(x$eps_abc, x$D2_at_eps_abc, col = "red", pch = 19, cex = 1.3)
+
+    leg_txt <- c(sprintf("all-pairs D2 (plateau %.2f)", plat$value),
+                 if (!is.null(x$D2_obs))       "target-relative D2",
+                 if (!is.na(x$D2_at_eps_abc))  sprintf("D2 at eps_abc = %.2f", x$D2_at_eps_abc))
+    leg_col <- c("steelblue",
+                 if (!is.null(x$D2_obs))       "darkgreen",
+                 if (!is.na(x$D2_at_eps_abc))  "red")
+    leg_lty <- c(1, if (!is.null(x$D2_obs)) 1, if (!is.na(x$D2_at_eps_abc)) NA)
+    leg_pch <- c(NA, if (!is.null(x$D2_obs)) NA, if (!is.na(x$D2_at_eps_abc)) 19)
     legend("topright", bty = "n", cex = 0.8,
-           legend = c(sprintf("plateau D2 = %.2f [%.2f, %.2f]",
-                              plat$value, plat$lo, plat$hi),
-                      "scaling region", "excluded (under/over)"),
-           lty = c(2, NA, NA), pch = c(NA, 15, 15),
-           col = c("black", "white", "grey80"))
+           legend = leg_txt, col = leg_col, lty = leg_lty, pch = leg_pch)
 
     ## -- Panel 2: correlation integral log C vs log eps --------------------
     ## drop C == 0 points (small eps) so log axis doesn't warn / clip
@@ -306,13 +330,14 @@ summary.corrdim4abc <- function(object, print = TRUE,
             cat("\n")
             cat(sprintf("  eps_abc (tol=%.3g)   : %.4g  (%.1f%% of pairwise distances)\n",
                         x$tol, x$eps_abc, 100 * x$eps_abc.pct))
-            cat(sprintf("  eps_abc in plateau  : %s\n",
-                        if (x$eps_abc.in.plateau) "YES  -- ABC operates at the D2 plateau"
-                        else "NO   -- check sampling / scaling region"))
+            cat(sprintf("  D2 at eps_abc (target-relative): %.2f\n", x$D2_at_eps_abc))
+            cat("    (slope of the acceptance curve at the tolerance ABC uses --\n")
+            cat("     the dimension ABC actually operates in)\n")
         }
     }
 
     res <- c(D2 = plat$value, lo = plat$lo, hi = plat$hi,
-             eps_abc = x$eps_abc, eps_abc.pct = x$eps_abc.pct)
+             eps_abc = x$eps_abc, eps_abc.pct = x$eps_abc.pct,
+             D2_at_eps_abc = x$D2_at_eps_abc)
     invisible(res)
 }
