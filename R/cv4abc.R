@@ -158,7 +158,8 @@ cv4abc <- function(param, sumstat, abc.out = NULL, nval, tols,
                 abc(target = mytarget, param = myparam, sumstat = mysumstat, tol = mytol,
                     subset = mysubset, method = method, transf = transf,
                     logit.bounds = logit.bounds, kernel = kernel, hcorr = hcorr,
-                    distance = distance),
+                    distance = distance, numnet = numnet, sizenet = sizenet,
+                    lambda = lambda, trace = trace, maxit = maxit, ...),
                 warning = namesWarningFilter)
 
             ## --- point estimate (original behaviour) ---
