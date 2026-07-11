@@ -275,11 +275,11 @@ plot.cv4abc <- function(x, sbc = FALSE, exclude = NULL, log = NULL, file = NULL,
 
             if (!is.null(file) || !ask) {
                 ## rank histograms (2x2 grid, auto-paginates in PDF)
-                old_par <- par(mfrow = c(2, 2), cex = 1, cex.main = 1.1, cex.lab = 1)
+                old_par <- par(mfrow = c(2, 2), oma = c(0, 0, 3, 0), cex = 1, cex.main = 1.1, cex.lab = 1)
                 on.exit(par(old_par), add = TRUE)
             } else {
                 devAskNewPage(TRUE)
-                old_par <- par(mfrow = c(2, 2), cex = 1, cex.main = 1.1, cex.lab = 1)
+                old_par <- par(mfrow = c(2, 2), oma = c(0, 0, 3, 0), cex = 1, cex.main = 1.1, cex.lab = 1)
                 on.exit(par(old_par), add = TRUE)
             }
 
@@ -292,11 +292,11 @@ plot.cv4abc <- function(x, sbc = FALSE, exclude = NULL, log = NULL, file = NULL,
                 abline(h = expected_height, col = "red", lty = 2, lwd = 1.5)
             }
             mtext("SBC Rank Histograms  (flat = well calibrated)",
-                  outer = TRUE, line = -1.5, cex = 1.1)
+                  outer = TRUE, line = 0.5, cex = 1.1)
 
             ## coverage curve
             coverage <- .sbc_coverage(ranks, levels)
-            par(mfrow = c(1, 1))
+            par(mfrow = c(1, 1), oma = c(0, 0, 0, 0))
             plot(NULL, xlim = c(0,1), ylim = c(0,1),
                  xlab = "Expected coverage", ylab = "Actual coverage",
                  main = paste0("SBC Coverage Curve  (tol=", mytol, ")\n",
